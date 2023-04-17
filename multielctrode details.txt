@@ -1,0 +1,58 @@
+# Define constants
+FARADAY_CONSTANT = 96485    # Coulombs per mole of electrons
+MOLAR_VOLUME = 24.45        # Liters per mole at STP
+IDEAL_GAS_CONSTANT = 0.08206  # L·atm/(mol·K)
+
+# Define input values
+corrosion_value = 0.05      # Corrosion rate in mm/year
+bubble_count = 100          # Number of bubbles observed during experiment
+electrode_type = 'steel'    # Type of electrode
+applied_current = 0.1       # Applied current in Ampere
+electrode_area = 0.01       # Electrode surface area in m^2
+liquid_volume = 1.0         # Volume of liquid in which electrode is submerged in liters
+temperature = 25            # Temperature in Celsius
+solution_concentration = 1.0 # Solution concentration in moles per liter
+solution_medium = 'neutral' # Solution medium, can be 'acidic', 'alkaline' or 'neutral'
+
+# Define reaction and calculate moles of electrons
+if electrode_type == 'steel':
+    # Reaction for steel: Fe + 2H2O -> Fe(OH)2 + H2
+    moles_electrons = corrosion_value / (56.0 * 10**-6)  # Moles of iron per mm of corrosion
+    moles_hydrogen = moles_electrons / 2.0
+else:
+    print("Error: electrode type not recognized")
+    exit()
+
+# Calculate volume of hydrogen gas produced
+volume_hydrogen = moles_hydrogen * MOLAR_VOLUME
+
+# Calculate mass of hydrogen gas produced
+mass_hydrogen = volume_hydrogen * 0.08988  # Density of hydrogen gas at STP in g/L
+
+# Calculate the partial pressure of hydrogen gas produced
+if solution_medium == 'acidic':
+    henrys_constant = 0.032 # Henry's constant for H2 in acidic solution (mol/L/atm)
+elif solution_medium == 'alkaline':
+    henrys_constant = 0.11 # Henry's constant for H2 in alkaline solution (mol/L/atm)
+else:
+    henrys_constant = 0.000089 # Henry's constant for H2 in neutral solution (mol/L/atm)
+
+partial_pressure = (mass_hydrogen * IDEAL_GAS_CONSTANT * (temperature + 273.15)) / (liquid_volume * 1000)  # Convert liters to mL
+partial_pressure *= henrys_constant * solution_concentration
+
+# Calculate the rate of hydrogen gas production
+rate_hydrogen = (applied_current / (FARADAY_CONSTANT * electrode_area)) * moles_hydrogen
+
+# Print results
+print("Moles of electrons: {:.2e}".format(moles_electrons))
+print("Moles of hydrogen gas produced: {:.2e}".format(moles_hydrogen))
+print("Volume of hydrogen gas produced: {:.2f} L".format(volume_hydrogen))
+print("Mass of hydrogen gas produced: {:.2f} g".format(mass_hydrogen))
+print("Partial pressure of hydrogen gas produced: {:.2f} atm".format(partial_pressure))
+print("Rate of hydrogen gas production: {:.2e} mol/s".format(rate_hydrogen))
+print("Number of bubbles per unit volume of hydrogen gas produced: {:.2f}".format(bubble_count / volume_hydrogen))
+
+
+
+
+	
